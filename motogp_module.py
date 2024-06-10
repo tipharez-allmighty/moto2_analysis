@@ -3,7 +3,7 @@ import numpy as np
 
 
 
-def Standings(data: pd.DataFrame, year: int, category: str):
+def showStandings(data: pd.DataFrame, year: int, category: str):
     '''
     
     Function to calculate standings for a given year and category
