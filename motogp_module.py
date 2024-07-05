@@ -98,12 +98,12 @@ def mostCommonPosition(data: pd.DataFrame, year: int, category: str):
 
 def medianTimeToLeader(data: pd.DataFrame, year: int, category: str):
     '''
-    
-    Function to calculate the average time difference to the leader for each rider
-    
+    Function to calculate the median time difference to the leader for each rider.
     '''
-    data.loc[:,'time'] = data['time'].astype(str)
     
+    data = data.copy()
+    data['time'] = data['time'].astype(str)
+
     def timeFormat(time_str):
         if 'Lap' in time_str:
             laps = int(time_str.split()[0])
@@ -117,11 +117,18 @@ def medianTimeToLeader(data: pd.DataFrame, year: int, category: str):
         else:
             time_diff = float(time_str.replace('+', ''))
             return time_diff
-    data.loc[:, 'time_to_leader'] = data.apply(lambda row: 0 if row['position'] == 1 else timeFormat(row['time']), axis=1)
-    data.loc[:, 'time_to_leader'] = data.apply(lambda row: np.nan if row['position'] < 0 else row['time_to_leader'], axis=1)
+    
+
+    data['time_to_leader'] = data.apply(
+        lambda row: 0 if row['position'] == 1 else timeFormat(row['time']), axis=1
+    )
+    
+
+    data.loc[data['position'] < 0, 'time_to_leader'] = np.nan
+
     median_time_diff = data[(data['year'] == year) & (data['category'] == category)].copy()
     median_time_diff = median_time_diff.groupby('rider_name')['time_to_leader'].median().sort_values(ascending=True).reset_index()
-    median_time_diff = median_time_diff.rename(columns={'time_to_leader':'median_time_diff'}) 
+    median_time_diff = median_time_diff.rename(columns={'time_to_leader': 'median_time_diff'})
     
     return median_time_diff
 
